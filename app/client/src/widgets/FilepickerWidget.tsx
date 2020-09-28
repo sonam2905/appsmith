@@ -22,6 +22,7 @@ import shallowequal from "shallowequal";
 import _ from "lodash";
 import * as Sentry from "@sentry/react";
 import withMeta, { WithMeta } from "./MetaHOC";
+import { ActionDescription } from "../entities/DataTree/dataTreeFactory";
 
 class FilePickerWidget extends BaseWidget<
   FilePickerWidgetProps,
@@ -154,7 +155,7 @@ class FilePickerWidget extends BaseWidget<
   onFilesSelected() {
     if (this.props.onFilesSelected) {
       this.executeAction({
-        dynamicString: this.props.onFilesSelected,
+        triggers: this.props.onFilesSelected,
         event: {
           type: EventType.ON_FILES_SELECTED,
           callback: this.handleFileUploaded,
@@ -227,7 +228,7 @@ export interface FilePickerWidgetProps extends WidgetProps, WithMeta {
   maxFileSize?: number;
   files?: any[];
   allowedFileTypes: string[];
-  onFilesSelected?: string;
+  onFilesSelected?: ActionDescription<any>[];
   isRequired?: boolean;
   uploadedFileUrlPaths?: string;
 }
