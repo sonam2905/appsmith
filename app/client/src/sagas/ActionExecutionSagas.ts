@@ -73,7 +73,7 @@ import { getType, Types } from "utils/TypeHelpers";
 import PerformanceTracker, {
   PerformanceTransactionName,
 } from "utils/PerformanceTracker";
-import { evaluateSingleValue } from "./evaluationsSaga";
+import { evaluateDynamicTrigger, evaluateSingleValue } from "./evaluationsSaga";
 
 function* navigateActionSaga(
   action: { pageNameOrUrl: string; params: Record<string, string> },
@@ -343,7 +343,7 @@ export function* executeActionSaga(
       if (onError) {
         yield put(
           executeAction({
-            triggers: onError,
+            dynamicString: onError,
             event: {
               ...event,
               type: EventType.ON_ERROR,
@@ -370,7 +370,7 @@ export function* executeActionSaga(
       if (onSuccess) {
         yield put(
           executeAction({
-            triggers: onSuccess,
+            dynamicString: onSuccess,
             event: {
               ...event,
               type: EventType.ON_SUCCESS,
@@ -399,7 +399,7 @@ export function* executeActionSaga(
     if (onError) {
       yield put(
         executeAction({
-          triggers: onError,
+          dynamicString: `{{${onError}}}`,
           event: {
             ...event,
             type: EventType.ON_ERROR,
@@ -468,11 +468,19 @@ function* executeActionTriggers(
 }
 
 function* executeAppAction(action: ReduxAction<ExecuteActionPayload>) {
-  const { triggers, event, responseData } = action.payload;
-  log.debug({ triggers });
+  const { dynamicString, event, responseData } = action.payload;
+  log.debug({ dynamicString });
+
+  const triggers = yield call(
+    evaluateDynamicTrigger,
+    dynamicString,
+    responseData,
+  );
   if (triggers && triggers.length) {
     yield all(
-      triggers.map(trigger => call(executeActionTriggers, trigger, event)),
+      triggers.map((trigger: ActionDescription<any>) =>
+        call(executeActionTriggers, trigger, event),
+      ),
     );
   } else {
     if (event.callback) event.callback({ success: true });

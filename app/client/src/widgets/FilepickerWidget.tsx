@@ -155,7 +155,7 @@ class FilePickerWidget extends BaseWidget<
   onFilesSelected() {
     if (this.props.onFilesSelected) {
       this.executeAction({
-        triggers: this.props.onFilesSelected,
+        dynamicString: this.props.onFilesSelected,
         event: {
           type: EventType.ON_FILES_SELECTED,
           callback: this.handleFileUploaded,
@@ -228,7 +228,7 @@ export interface FilePickerWidgetProps extends WidgetProps, WithMeta {
   maxFileSize?: number;
   files?: any[];
   allowedFileTypes: string[];
-  onFilesSelected?: ActionDescription<any>[];
+  onFilesSelected?: string;
   isRequired?: boolean;
   uploadedFileUrlPaths?: string;
 }
