@@ -21,12 +21,7 @@ import {
   takeEvery,
   takeLatest,
 } from "redux-saga/effects";
-import { getDataTree } from "selectors/dataTreeSelectors";
-import {
-  getDynamicBindings,
-  getDynamicValue,
-  isDynamicValue,
-} from "utils/DynamicBindingUtils";
+import { getDynamicBindings, isDynamicValue } from "utils/DynamicBindingUtils";
 import {
   ActionDescription,
   RunActionPayload,
@@ -48,8 +43,8 @@ import {
 import {
   executeApiActionRequest,
   executeApiActionSuccess,
-  updateAction,
   showRunActionConfirmModal,
+  updateAction,
 } from "actions/actionActions";
 import { Action, RestAction } from "entities/Action";
 import ActionAPI, {
@@ -78,6 +73,7 @@ import { getType, Types } from "utils/TypeHelpers";
 import PerformanceTracker, {
   PerformanceTransactionName,
 } from "utils/PerformanceTracker";
+import { evaluateSingleValue } from "./evaluationsSaga";
 
 function* navigateActionSaga(
   action: { pageNameOrUrl: string; params: Record<string, string> },
@@ -199,10 +195,7 @@ const isErrorResponse = (response: ActionApiResponse) => {
 };
 
 export function* evaluateDynamicBoundValueSaga(path: string): any {
-  log.debug("Evaluating data tree to get action binding value");
-  const tree = yield select(getDataTree);
-  const dynamicResult = getDynamicValue(`{{${path}}}`, tree);
-  return dynamicResult.result;
+  return yield call(evaluateSingleValue, `{{${path}}}`);
 }
 
 const EXECUTION_PARAM_PATH = "this.params";
