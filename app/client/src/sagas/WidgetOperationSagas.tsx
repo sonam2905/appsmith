@@ -153,6 +153,7 @@ function* generateChildWidgets(
     );
   }
   widget.parentId = parent.widgetId;
+  delete widget.blueprint;
   return { widgetId: widget.widgetId, widgets };
 }
 
